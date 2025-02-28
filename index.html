@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pulmonary Artery Reference Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        h2 {
+            font-size: 1.4rem;
+        }
+        .input-section, .results-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 120px;
+            font-weight: bold;
+        }
+        input[type="number"], select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            width: 100%;
+            max-width: 250px;
+            margin: 0 auto;
+            display: block;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .citation {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .unit-toggle, .sex-toggle {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .unit-toggle label, .sex-toggle label {
+            margin-right: 15px;
+            width: auto;
+        }
+        .height-display {
+            margin-top: 5px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        /* Mobile responsiveness improvements */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .input-section, .results-section {
+                padding: 15px;
+            }
+            
+            .unit-toggle, .sex-toggle {
+                flex-direction: column;
+            }
+            
+            .unit-toggle label, .sex-toggle label {
+                margin-bottom: 8px;
+            }
+            
+            /* Card-based layout for results on mobile */
+            table, thead, tbody, th, td, tr { 
+                display: block; 
+            }
+            
+            table thead tr { 
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            tr {
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            td { 
+                position: relative;
+                padding-left: 50%; 
+                min-height: 30px;
+            }
+            
+            td:before { 
+                position: absolute;
+                top: 12px;
+                left: 12px;
+                width: 45%; 
+                padding-right: 10px; 
+                white-space: nowrap;
+                font-weight: bold;
+            }
+            
+            /* Labels for the mobile table */
+            td:nth-of-type(1):before { content: "Measurement"; }
+            td:nth-of-type(2):before { content: "Median (50th)"; }
+            td:nth-of-type(3):before { content: "95th percentile"; }
+            td:nth-of-type(4):before { content: "97.5th percentile"; }
+            
+            input[type="number"] {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Pulmonary Artery Reference Calculator</h1>
+    
+    <div class="input-section">
+        <h2>Patient Information</h2>
+        
+        <div class="sex-toggle">
+            <label>Sex:</label>
+            <label>
+                <input type="radio" name="sex" value="male" checked> Male
+            </label>
+            <label>
+                <input type="radio" name="sex" value="female"> Female
+            </label>
+        </div>
+        
+        <div class="input-group">
+            <label for="age">Age (years):</label>
+            <input type="number" id="age" min="18" max="90" placeholder="Years">
+        </div>
+        
+        <div class="unit-toggle">
+            <label>Height Units:</label>
+            <label>
+                <input type="radio" name="unit-system" value="metric" checked> Metric
+            </label>
+            <label>
+                <input type="radio" name="unit-system" value="imperial"> Imperial
+            </label>
+        </div>
+        
+        <div id="metric-inputs">
+            <div class="input-group">
+                <label for="height-cm">Height (cm):</label>
+                <input type="number" id="height-cm" min="100" max="220" placeholder="cm">
+            </div>
+            <div class="height-display" id="metric-converted-display"></div>
+        </div>
+        
+        <div id="imperial-inputs" style="display:none;">
+            <div class="input-group">
+                <label for="height-ft">Height (ft):</label>
+                <input type="number" id="height-ft" min="3" max="7" placeholder="ft">
+            </div>
+            <div class="input-group">
+                <label for="height-in">Height (in):</label>
+                <input type="number" id="height-in" min="0" max="11" placeholder="in">
+            </div>
+            <div class="height-display" id="imperial-converted-display"></div>
+        </div>
+        
+        <button id="calculate-btn">Calculate</button>
+    </div>
+    
+    <div class="results-section">
+        <h2>Reference Values</h2>
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th>Measurement</th>
+                    <th>Median (50th percentile)</th>
+                    <th>95th percentile</th>
+                    <th>97.5th percentile</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>MPA Diameter - Diastole (mm)</td>
+                    <td id="mpa-min-50">-</td>
+                    <td id="mpa-min-95">-</td>
+                    <td id="mpa-min-975">-</td>
+                </tr>
+                <tr>
+                    <td>MPA Diameter - Systole (mm)</td>
+                    <td id="mpa-max-50">-</td>
+                    <td id="mpa-max-95">-</td>
+                    <td id="mpa-max-975">-</td>
+                </tr>
+                <tr>
+                    <td>RPA Diameter - Diastole (mm)</td>
+                    <td id="rpa-min-50">-</td>
+                    <td id="rpa-min-95">-</td>
+                    <td id="rpa-min-975">-</td>
+                </tr>
+                <tr>
+                    <td>RPA Diameter - Systole (mm)</td>
+                    <td id="rpa-max-50">-</td>
+                    <td id="rpa-max-95">-</td>
+                    <td id="rpa-max-975">-</td>
+                </tr>
+                <tr>
+                    <td>RPA Area - Diastole (cm²)*</td>
+                    <td id="rpa-area-min-50">-</td>
+                    <td id="rpa-area-min-95">-</td>
+                    <td id="rpa-area-min-975">-</td>
+                </tr>
+                <tr>
+                    <td>RPA Area - Systole (cm²)*</td>
+                    <td id="rpa-area-max-50">-</td>
+                    <td id="rpa-area-max-95">-</td>
+                    <td id="rpa-area-max-975">-</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="citation">
+        <p><strong>Reference:</strong> Bagherzadeh SP, et al. <a href="https://pubmed.ncbi.nlm.nih.gov/39025204/" target="_blank">Reference Equations for Pulmonary Artery Size and Pulsatility Using Echocardiography and Their Diagnostic Value in Pulmonary Hypertension.</a> CHEST 2024; 166(5):1184-1196</p>
+        <p><em>Note: This calculator provides reference values based on quantile regression equations from the cited study. These values should be interpreted in the clinical context and are not diagnostic in isolation.</em></p>
+        <p><em>* RPA area values are indexed to BSA. Since weight is not entered, we estimate BSA using the Mosteller formula and an estimated weight based on a BMI of 25 (considered a healthy reference BMI).</em></p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const metricInputs = document.getElementById('metric-inputs');
+            const imperialInputs = document.getElementById('imperial-inputs');
+            const metricConvertedDisplay = document.getElementById('metric-converted-display');
+            const imperialConvertedDisplay = document.getElementById('imperial-converted-display');
+            const heightCmInput = document.getElementById('height-cm');
+            const heightFtInput = document.getElementById('height-ft');
+            const heightInInput = document.getElementById('height-in');
+            const unitRadios = document.getElementsByName('unit-system');
+            
+            // Unit system toggle
+            for (const radio of unitRadios) {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'metric') {
+                        metricInputs.style.display = 'block';
+                        imperialInputs.style.display = 'none';
+                        // Update metric input based on imperial values if they exist
+                        updateMetricFromImperial();
+                    } else {
+                        metricInputs.style.display = 'none';
+                        imperialInputs.style.display = 'block';
+                        // Update imperial inputs based on metric value if it exists
+                        updateImperialFromMetric();
+                    }
+                });
+            }
+            
+            // Height conversion functions
+            function updateMetricFromImperial() {
+                const ft = parseFloat(heightFtInput.value) || 0;
+                const inches = parseFloat(heightInInput.value) || 0;
+                if (ft > 0 || inches > 0) {
+                    const totalInches = (ft * 12) + inches;
+                    const cm = (totalInches * 2.54).toFixed(1);
+                    heightCmInput.value = cm;
+                }
+            }
+            
+            function updateImperialFromMetric() {
+                const cm = parseFloat(heightCmInput.value);
+                if (cm > 0) {
+                    const totalInches = cm / 2.54;
+                    const ft = Math.floor(totalInches / 12);
+                    const inches = Math.round(totalInches % 12);
+                    heightFtInput.value = ft;
+                    heightInInput.value = inches;
+                }
+            }
+            
+            // Real-time conversion display
+            heightCmInput.addEventListener('input', function() {
+                const cm = parseFloat(this.value);
+                if (!isNaN(cm)) {
+                    const totalInches = cm / 2.54;
+                    const ft = Math.floor(totalInches / 12);
+                    const inches = Math.round(totalInches % 12);
+                    imperialConvertedDisplay.textContent = `Equivalent to: ${ft} ft ${inches} in`;
+                } else {
+                    imperialConvertedDisplay.textContent = '';
+                }
+            });
+            
+            function updateMetricDisplay() {
+                const ft = parseFloat(heightFtInput.value) || 0;
+                const inches = parseFloat(heightInInput.value) || 0;
+                if (ft > 0 || inches > 0) {
+                    const totalInches = (ft * 12) + inches;
+                    const cm = (totalInches * 2.54).toFixed(1);
+                    metricConvertedDisplay.textContent = `Equivalent to: ${cm} cm`;
+                } else {
+                    metricConvertedDisplay.textContent = '';
+                }
+            }
+            
+            heightFtInput.addEventListener('input', updateMetricDisplay);
+            heightInInput.addEventListener('input', updateMetricDisplay);
+            
+            // Calculate button
+            document.getElementById('calculate-btn').addEventListener('click', calculateReferenceValues);
+            
+            function calculateReferenceValues() {
+                // Get input values
+                const age = parseFloat(document.getElementById('age').value);
+                const isMale = document.querySelector('input[name="sex"]:checked').value === 'male';
+                let heightCm = 0;
+                
+                // Check which unit system is selected
+                const isMetric = document.querySelector('input[name="unit-system"]:checked').value === 'metric';
+                
+                if (isMetric) {
+                    heightCm = parseFloat(document.getElementById('height-cm').value);
+                } else {
+                    const heightFt = parseFloat(document.getElementById('height-ft').value) || 0;
+                    const heightIn = parseFloat(document.getElementById('height-in').value) || 0;
+                    heightCm = ((heightFt * 12) + heightIn) * 2.54;
+                }
+                
+                // Validate inputs
+                if (isNaN(age) || isNaN(heightCm) || age < 18 || age > 90 || heightCm < 100 || heightCm > 220) {
+                    alert('Please enter valid values. Age should be between 18-90 years and height should be reasonable.');
+                    return;
+                }
+                
+                // Convert height to meters for indexing
+                const heightM = heightCm / 100;
+                
+                // Calculate reference values using quantile regression equations
+                
+                // MPA Diameter - Diastole (indexed values from paper)
+                const mpaDiasIndex50 = 10.7 + 0.02 * age;
+                const mpaDiasIndex95 = 13.2 + 0.02 * age;
+                const mpaDiasIndex975 = 13.6 + 0.02 * age;
+                
+                // MPA Diameter - Systole (indexed values from paper)
+                const mpaSysIndex50 = 13.1 + 0.04 * age;
+                const mpaSysIndex95 = 15.8 + 0.05 * age;
+                const mpaSysIndex975 = 15.4 + 0.07 * age; // Note: Corrected from 0.77 to 0.07
+                
+                // RPA Diameter - Diastole (indexed values from paper)
+                const rpaDiasIndex50 = 8.1 + 0.03 * age;
+                const rpaDiasIndex95 = 10.4 + 0.02 * age;
+                const rpaDiasIndex975 = 9.5 + 0.05 * age;
+                
+                // RPA Diameter - Systole (indexed values from paper)
+                // Note the sex adjustment from the paper
+                const rpaSysIndex50 = 10.2 + 0.03 * age;
+                const rpaSysIndex95 = 12.1 + 0.05 * age - (0.8 * (isMale ? 1 : 0));
+                const rpaSysIndex975 = 12.7 + 0.04 * age - (0.9 * (isMale ? 1 : 0));
+                
+                // Convert indexed values to absolute values (multiply by height in meters)
+                document.getElementById('mpa-min-50').textContent = (mpaDiasIndex50 * heightM).toFixed(1);
+                document.getElementById('mpa-min-95').textContent = (mpaDiasIndex95 * heightM).toFixed(1);
+                document.getElementById('mpa-min-975').textContent = (mpaDiasIndex975 * heightM).toFixed(1);
+                
+                document.getElementById('mpa-max-50').textContent = (mpaSysIndex50 * heightM).toFixed(1);
+                document.getElementById('mpa-max-95').textContent = (mpaSysIndex95 * heightM).toFixed(1);
+                document.getElementById('mpa-max-975').textContent = (mpaSysIndex975 * heightM).toFixed(1);
+                
+                document.getElementById('rpa-min-50').textContent = (rpaDiasIndex50 * heightM).toFixed(1);
+                document.getElementById('rpa-min-95').textContent = (rpaDiasIndex95 * heightM).toFixed(1);
+                document.getElementById('rpa-min-975').textContent = (rpaDiasIndex975 * heightM).toFixed(1);
+                
+                document.getElementById('rpa-max-50').textContent = (rpaSysIndex50 * heightM).toFixed(1);
+                document.getElementById('rpa-max-95').textContent = (rpaSysIndex95 * heightM).toFixed(1);
+                document.getElementById('rpa-max-975').textContent = (rpaSysIndex975 * heightM).toFixed(1);
+                
+                // RPA area measurements                
+                // Calculate BSA using Mosteller formula with estimated weight based on BMI of 25
+                const estimatedWeight = 25 * (heightM * heightM); // weight in kg based on BMI of 25
+                const bsa = Math.sqrt((heightCm * estimatedWeight) / 3600); // Mosteller formula
+                
+                // RPA area reference values (from Table 3, using BSA scaling)
+                const rpaAreaMedSF = isMale ? 1.2 : 0.9; // Median RPA area in diastole
+                const rpaArea95SF = isMale ? 2.1 : 1.9; // 95th percentile RPA area in diastole
+                document.getElementById('rpa-area-min-50').textContent = (rpaAreaMedSF * bsa).toFixed(1);
+                document.getElementById('rpa-area-min-95').textContent = (rpaArea95SF * bsa).toFixed(1);
+                document.getElementById('rpa-area-min-975').textContent = "--" //(4.0 * bsa).toFixed(1); // Estimated
+
+                const rpaAreaMaxMedSF = isMale ? 1.8 : 1.4; // Median RPA area in diastole
+                const rpaAreaMax95SF = 3.0; // 95th percentile RPA area in diastole
+                document.getElementById('rpa-area-max-50').textContent = (rpaAreaMaxMedSF * bsa).toFixed(1);
+                document.getElementById('rpa-area-max-95').textContent = (rpaAreaMax95SF * bsa).toFixed(1);
+                document.getElementById('rpa-area-max-975').textContent = "--" //(5.5 * bsa).toFixed(1); // Estimated
+            }
+        });
+    </script>
+</body>
+</html>
